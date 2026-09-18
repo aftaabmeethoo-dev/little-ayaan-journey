@@ -1,0 +1,131 @@
+name: Patch Writing Time into homepage
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Overlay Writing Time inside hero image
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+
+          marker = "AYAAN_WRITING_TIME_INSIDE_HERO_V1"
+          if marker in s:
+              print("Patch already present")
+              raise SystemExit(0)
+
+          patch = r'''
+<!-- AYAAN_WRITING_TIME_INSIDE_HERO_V1 -->
+<style>
+  .ayaan-writing-inside-picture{
+    position:absolute!important;
+    z-index:30!important;
+    left:50%!important;
+    bottom:5.5%!important;
+    transform:translateX(-50%)!important;
+    margin:0!important;
+    max-width:34%!important;
+    white-space:nowrap!important;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.28));
+  }
+  @media(max-width:700px){
+    .ayaan-writing-inside-picture{
+      bottom:4%!important;
+      max-width:46%!important;
+      transform:translateX(-50%) scale(.92)!important;
+      transform-origin:center bottom!important;
+    }
+  }
+</style>
+<script>
+(function(){
+  function norm(t){ return (t||'').replace(/\s+/g,' ').trim().toLowerCase(); }
+  function visible(el){
+    if(!el) return false;
+    const r=el.getBoundingClientRect(), st=getComputedStyle(el);
+    return r.width>0 && r.height>0 && st.display!=='none' && st.visibility!=='hidden';
+  }
+  function findWriting(){
+    const els=[...document.querySelectorAll('a,button,[role="button"],div,span')];
+    const exact=els.filter(e=>visible(e) && norm(e.textContent)==='writing time');
+    if(!exact.length) return null;
+    return exact.sort((a,b)=>a.children.length-b.children.length)[0];
+  }
+  function findHero(){
+    const imgs=[...document.images].filter(visible);
+    if(!imgs.length) return null;
+    imgs.sort((a,b)=>{
+      const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
+      return (br.width*br.height)-(ar.width*ar.height);
+    });
+    return imgs[0];
+  }
+  function place(){
+    const writing=findWriting(), img=findHero();
+    if(!writing || !img) return false;
+
+    let control=writing.closest('a,button,[role="button"]') || writing;
+
+    let host=img.parentElement;
+    if(!host || host===document.body){
+      host=document.createElement('div');
+      host.style.position='relative';
+      host.style.display='inline-block';
+      img.parentNode.insertBefore(host,img);
+      host.appendChild(img);
+    } else if(getComputedStyle(host).position==='static') {
+      host.style.position='relative';
+    }
+
+    control.classList.add('ayaan-writing-inside-picture');
+    host.appendChild(control);
+    return true;
+  }
+
+  function run(){
+    if(place()) return;
+    let n=0;
+    const timer=setInterval(()=>{ if(place() || ++n>30) clearInterval(timer); },250);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run);
+  else run();
+})();
+</script>
+'''
+          lower = s.lower()
+          if "</body>" in lower:
+              i = lower.rfind("</body>")
+              s = s[:i] + patch + s[i:]
+          else:
+              s += patch
+
+          p.write_text(s, encoding="utf-8")
+          print("Homepage patch inserted")
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Place Writing Time inside homepage picture"
+          git push
