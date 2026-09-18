@@ -1,9 +1,10 @@
-name: Patch Writing Time into homepage
+name: Patch Writing Time
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -14,116 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Overlay Writing Time inside hero image
-        shell: python
+      - name: Patch index
         run: |
-          from pathlib import Path
-
-          p = Path("index.html")
-          s = p.read_text(encoding="utf-8")
-
-          marker = "AYAAN_WRITING_TIME_INSIDE_HERO_V1"
-          if marker in s:
-              print("Patch already present")
-              raise SystemExit(0)
-
-          patch = r'''
-<!-- AYAAN_WRITING_TIME_INSIDE_HERO_V1 -->
-<style>
-  .ayaan-writing-inside-picture{
-    position:absolute!important;
-    z-index:30!important;
-    left:50%!important;
-    bottom:5.5%!important;
-    transform:translateX(-50%)!important;
-    margin:0!important;
-    max-width:34%!important;
-    white-space:nowrap!important;
-    filter:drop-shadow(0 4px 8px rgba(0,0,0,.28));
-  }
-  @media(max-width:700px){
-    .ayaan-writing-inside-picture{
-      bottom:4%!important;
-      max-width:46%!important;
-      transform:translateX(-50%) scale(.92)!important;
-      transform-origin:center bottom!important;
-    }
-  }
-</style>
-<script>
-(function(){
-  function norm(t){ return (t||'').replace(/\s+/g,' ').trim().toLowerCase(); }
-  function visible(el){
-    if(!el) return false;
-    const r=el.getBoundingClientRect(), st=getComputedStyle(el);
-    return r.width>0 && r.height>0 && st.display!=='none' && st.visibility!=='hidden';
-  }
-  function findWriting(){
-    const els=[...document.querySelectorAll('a,button,[role="button"],div,span')];
-    const exact=els.filter(e=>visible(e) && norm(e.textContent)==='writing time');
-    if(!exact.length) return null;
-    return exact.sort((a,b)=>a.children.length-b.children.length)[0];
-  }
-  function findHero(){
-    const imgs=[...document.images].filter(visible);
-    if(!imgs.length) return null;
-    imgs.sort((a,b)=>{
-      const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
-      return (br.width*br.height)-(ar.width*ar.height);
-    });
-    return imgs[0];
-  }
-  function place(){
-    const writing=findWriting(), img=findHero();
-    if(!writing || !img) return false;
-
-    let control=writing.closest('a,button,[role="button"]') || writing;
-
-    let host=img.parentElement;
-    if(!host || host===document.body){
-      host=document.createElement('div');
-      host.style.position='relative';
-      host.style.display='inline-block';
-      img.parentNode.insertBefore(host,img);
-      host.appendChild(img);
-    } else if(getComputedStyle(host).position==='static') {
-      host.style.position='relative';
-    }
-
-    control.classList.add('ayaan-writing-inside-picture');
-    host.appendChild(control);
-    return true;
-  }
-
-  function run(){
-    if(place()) return;
-    let n=0;
-    const timer=setInterval(()=>{ if(place() || ++n>30) clearInterval(timer); },250);
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run);
-  else run();
-})();
-</script>
-'''
-          lower = s.lower()
-          if "</body>" in lower:
-              i = lower.rfind("</body>")
-              s = s[:i] + patch + s[i:]
-          else:
-              s += patch
-
-          p.write_text(s, encoding="utf-8")
-          print("Homepage patch inserted")
-
-      - name: Commit patch
-        shell: bash
+          python -c "from pathlib import Path; import base64; p=Path('index.html'); s=p.read_text(encoding='utf-8'); marker='AYAAN_WRITING_TIME_INSIDE_HERO_V2'; patch=base64.b64decode('CjwhLS0gQVlBQU5fV1JJVElOR19USU1FX0lOU0lERV9IRVJPX1YyIC0tPgo8c3R5bGU+Ci5heWFhbi13cml0aW5nLWluc2lkZS1waWN0dXJlewogcG9zaXRpb246YWJzb2x1dGUhaW1wb3J0YW50O3otaW5kZXg6MzAhaW1wb3J0YW50O2xlZnQ6NTAlIWltcG9ydGFudDtib3R0b206NSUhaW1wb3J0YW50OwogdHJhbnNmb3JtOnRyYW5zbGF0ZVgoLTUwJSkhaW1wb3J0YW50O21hcmdpbjowIWltcG9ydGFudDt3aGl0ZS1zcGFjZTpub3dyYXAhaW1wb3J0YW50OwogZmlsdGVyOmRyb3Atc2hhZG93KDAgNHB4IDhweCByZ2JhKDAsMCwwLC4yOCkpOwp9CkBtZWRpYShtYXgtd2lkdGg6NzAwcHgpewogLmF5YWFuLXdyaXRpbmctaW5zaWRlLXBpY3R1cmV7Ym90dG9tOjQlIWltcG9ydGFudDt0cmFuc2Zvcm06dHJhbnNsYXRlWCgtNTAlKSBzY2FsZSguOSkhaW1wb3J0YW50O30KfQo8L3N0eWxlPgo8c2NyaXB0PgooZnVuY3Rpb24oKXsKIGZ1bmN0aW9uIG5vcm0odCl7cmV0dXJuICh0fHwnJykucmVwbGFjZSgvXHMrL2csJyAnKS50cmltKCkudG9Mb3dlckNhc2UoKX0KIGZ1bmN0aW9uIHZpc2libGUoZSl7aWYoIWUpcmV0dXJuIGZhbHNlO3ZhciByPWUuZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCkscz1nZXRDb21wdXRlZFN0eWxlKGUpO3JldHVybiByLndpZHRoPjAmJnIuaGVpZ2h0PjAmJnMuZGlzcGxheSE9PSdub25lJyYmcy52aXNpYmlsaXR5IT09J2hpZGRlbid9CiBmdW5jdGlvbiBwbGFjZSgpewogIHZhciBlbHM9W10uc2xpY2UuY2FsbChkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCdhLGJ1dHRvbixbcm9sZT0iYnV0dG9uIl0sZGl2LHNwYW4nKSk7CiAgdmFyIHc9ZWxzLmZpbHRlcihmdW5jdGlvbihlKXtyZXR1cm4gdmlzaWJsZShlKSYmbm9ybShlLnRleHRDb250ZW50KT09PSd3cml0aW5nIHRpbWUnfSkuc29ydChmdW5jdGlvbihhLGIpe3JldHVybiBhLmNoaWxkcmVuLmxlbmd0aC1iLmNoaWxkcmVuLmxlbmd0aH0pWzBdOwogIHZhciBpbWdzPVtdLnNsaWNlLmNhbGwoZG9jdW1lbnQuaW1hZ2VzKS5maWx0ZXIodmlzaWJsZSkuc29ydChmdW5jdGlvbihhLGIpe3ZhciB4PWEuZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCkseT1iLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpO3JldHVybiB5LndpZHRoKnkuaGVpZ2h0LXgud2lkdGgqeC5oZWlnaHR9KTsKICB2YXIgaW1nPWltZ3NbMF07CiAgaWYoIXd8fCFpbWcpcmV0dXJuIGZhbHNlOwogIHZhciBjPXcuY2xvc2VzdCgnYSxidXR0b24sW3JvbGU9ImJ1dHRvbiJdJyl8fHc7CiAgdmFyIGg9aW1nLnBhcmVudEVsZW1lbnQ7CiAgaWYoIWh8fGg9PT1kb2N1bWVudC5ib2R5KXtoPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2RpdicpO2guc3R5bGUucG9zaXRpb249J3JlbGF0aXZlJztoLnN0eWxlLmRpc3BsYXk9J2lubGluZS1ibG9jayc7aW1nLnBhcmVudE5vZGUuaW5zZXJ0QmVmb3JlKGgsaW1nKTtoLmFwcGVuZENoaWxkKGltZyl9CiAgZWxzZSBpZihnZXRDb21wdXRlZFN0eWxlKGgpLnBvc2l0aW9uPT09J3N0YXRpYycpaC5zdHlsZS5wb3NpdGlvbj0ncmVsYXRpdmUnOwogIGMuY2xhc3NMaXN0LmFkZCgnYXlhYW4td3JpdGluZy1pbnNpZGUtcGljdHVyZScpO2guYXBwZW5kQ2hpbGQoYyk7cmV0dXJuIHRydWUKIH0KIGZ1bmN0aW9uIHJ1bigpe2lmKHBsYWNlKCkpcmV0dXJuO3ZhciBuPTAsdD1zZXRJbnRlcnZhbChmdW5jdGlvbigpe2lmKHBsYWNlKCl8fCsrbj40MCljbGVhckludGVydmFsKHQpfSwyNTApfQogaWYoZG9jdW1lbnQucmVhZHlTdGF0ZT09PSdsb2FkaW5nJylkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCdET01Db250ZW50TG9hZGVkJyxydW4pO2Vsc2UgcnVuKCkKfSkoKTsKPC9zY3JpcHQ+Cg==').decode('utf-8'); i=s.lower().rfind('</body>'); p.write_text(s if marker in s else (s[:i]+patch+s[i:] if i>=0 else s+patch), encoding='utf-8')"
+      - name: Commit
         run: |
-          if git diff --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
+          if git diff --quiet; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
