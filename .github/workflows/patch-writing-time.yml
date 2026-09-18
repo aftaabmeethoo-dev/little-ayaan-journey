@@ -1,30 +1,33 @@
-name: Fix Writing Time Placement
+name: Restore Homepage
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  patch:
+  restore:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Patch homepage
+      - name: Restore last good homepage
         run: |
-          python -c "from pathlib import Path; import base64; p=Path('index.html'); s=p.read_text(encoding='utf-8'); marker='AYAAN_WRITING_TIME_INSIDE_HERO_V3'; patch=base64.b64decode('CjwhLS0gQVlBQU5fV1JJVElOR19USU1FX0lOU0lERV9IRVJPX1YzIC0tPgo8c3R5bGU+CiAgLmF5YWFuLXdyaXRpbmctaW5zaWRlLXBpY3R1cmUtdjN7CiAgICBwb3NpdGlvbjphYnNvbHV0ZSFpbXBvcnRhbnQ7CiAgICB6LWluZGV4Ojk5OTkhaW1wb3J0YW50OwogICAgbWFyZ2luOjAhaW1wb3J0YW50OwogICAgd2lkdGg6YXV0byFpbXBvcnRhbnQ7CiAgICBtYXgtd2lkdGg6MjgwcHghaW1wb3J0YW50OwogICAgdHJhbnNmb3JtOm5vbmUhaW1wb3J0YW50OwogICAgYm94LXNpemluZzpib3JkZXItYm94IWltcG9ydGFudDsKICB9CgogIEBtZWRpYSAobWF4LXdpZHRoOjcwMHB4KXsKICAgIC5heWFhbi13cml0aW5nLWluc2lkZS1waWN0dXJlLXYzewogICAgICBtYXgtd2lkdGg6MTkwcHghaW1wb3J0YW50OwogICAgICB0cmFuc2Zvcm06c2NhbGUoLjg4KSFpbXBvcnRhbnQ7CiAgICAgIHRyYW5zZm9ybS1vcmlnaW46dG9wIGxlZnQhaW1wb3J0YW50OwogICAgfQogIH0KPC9zdHlsZT4KCjxzY3JpcHQ+CihmdW5jdGlvbigpewogIGZ1bmN0aW9uIHR4dChlbCl7CiAgICByZXR1cm4gKChlbCAmJiBlbC50ZXh0Q29udGVudCkgfHwgJycpLnJlcGxhY2UoL1xzKy9nLCcgJykudHJpbSgpLnRvTG93ZXJDYXNlKCk7CiAgfQoKICBmdW5jdGlvbiB2aXNpYmxlKGVsKXsKICAgIGlmKCFlbCkgcmV0dXJuIGZhbHNlOwogICAgY29uc3QgciA9IGVsLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpOwogICAgY29uc3QgcyA9IGdldENvbXB1dGVkU3R5bGUoZWwpOwogICAgcmV0dXJuIHIud2lkdGggPiAwICYmIHIuaGVpZ2h0ID4gMCAmJgogICAgICAgICAgIHMuZGlzcGxheSAhPT0gJ25vbmUnICYmCiAgICAgICAgICAgcy52aXNpYmlsaXR5ICE9PSAnaGlkZGVuJzsKICB9CgogIGZ1bmN0aW9uIGZpbmRXcml0aW5nQ2FyZCgpewogICAgY29uc3QgYWxsID0gWy4uLmRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2JvZHkgKicpXTsKICAgIGNvbnN0IG1hdGNoZXMgPSBhbGwuZmlsdGVyKGVsID0+IHsKICAgICAgY29uc3QgdCA9IHR4dChlbCk7CiAgICAgIHJldHVybiB2aXNpYmxlKGVsKSAmJgogICAgICAgICAgICAgdC5pbmNsdWRlcygnd3JpdGluZyB0aW1lJykgJiYKICAgICAgICAgICAgIHQubGVuZ3RoIDwgMTIwOwogICAgfSk7CgogICAgaWYoIW1hdGNoZXMubGVuZ3RoKSByZXR1cm4gbnVsbDsKCiAgICBtYXRjaGVzLnNvcnQoKGEsYikgPT4gewogICAgICBjb25zdCBhcj1hLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpLCBicj1iLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpOwogICAgICByZXR1cm4gKGJyLndpZHRoKmJyLmhlaWdodCkgLSAoYXIud2lkdGgqYXIuaGVpZ2h0KTsKICAgIH0pOwoKICAgIGZvcihjb25zdCBtIG9mIG1hdGNoZXMpewogICAgICBjb25zdCByPW0uZ2V0Qm91bmRpbmdDbGllbnRSZWN0KCk7CiAgICAgIGlmKHIud2lkdGggPiAxODAgJiYgci5oZWlnaHQgPiA1MCkgcmV0dXJuIG07CiAgICB9CgogICAgcmV0dXJuIG1hdGNoZXNbMF07CiAgfQoKICBmdW5jdGlvbiBmaW5kSGVybygpewogICAgY29uc3QgaW1ncz1bLi4uZG9jdW1lbnQuaW1hZ2VzXS5maWx0ZXIodmlzaWJsZSk7CiAgICBpZighaW1ncy5sZW5ndGgpIHJldHVybiBudWxsOwoKICAgIGltZ3Muc29ydCgoYSxiKT0+ewogICAgICBjb25zdCBhcj1hLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpLCBicj1iLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpOwogICAgICByZXR1cm4gKGJyLndpZHRoKmJyLmhlaWdodCktKGFyLndpZHRoKmFyLmhlaWdodCk7CiAgICB9KTsKCiAgICByZXR1cm4gaW1nc1swXTsKICB9CgogIGZ1bmN0aW9uIHBsYWNlKCl7CiAgICBjb25zdCBjYXJkPWZpbmRXcml0aW5nQ2FyZCgpOwogICAgY29uc3QgaW1nPWZpbmRIZXJvKCk7CiAgICBpZighY2FyZCB8fCAhaW1nKSByZXR1cm4gZmFsc2U7CgogICAgY2FyZC5jbGFzc0xpc3QucmVtb3ZlKCdheWFhbi13cml0aW5nLWluc2lkZS1waWN0dXJlJyk7CiAgICBjYXJkLmNsYXNzTGlzdC5hZGQoJ2F5YWFuLXdyaXRpbmctaW5zaWRlLXBpY3R1cmUtdjMnKTsKCiAgICBpZihjYXJkLnBhcmVudEVsZW1lbnQgIT09IGRvY3VtZW50LmJvZHkpewogICAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKGNhcmQpOwogICAgfQoKICAgIGNvbnN0IHI9aW1nLmdldEJvdW5kaW5nQ2xpZW50UmVjdCgpOwoKICAgIC8qIFBsYWNlIGluc2lkZSB0aGUgaWxsdXN0cmF0aW9uLCBsb3dlci1yaWdodCBzZWN0aW9uICovCiAgICBjb25zdCBsZWZ0ID0gd2luZG93LnNjcm9sbFggKyByLmxlZnQgKyAoci53aWR0aCAqIDAuNjEpOwogICAgY29uc3QgdG9wICA9IHdpbmRvdy5zY3JvbGxZICsgci50b3AgICsgKHIuaGVpZ2h0ICogMC43Nyk7CgogICAgY2FyZC5zdHlsZS5sZWZ0ID0gbGVmdCArICdweCc7CiAgICBjYXJkLnN0eWxlLnRvcCA9IHRvcCArICdweCc7CiAgICBjYXJkLnN0eWxlLmJvdHRvbSA9ICdhdXRvJzsKICAgIGNhcmQuc3R5bGUucmlnaHQgPSAnYXV0byc7CgogICAgY29uc3QgbWF4VyA9IHIud2lkdGggKiAwLjMyOwogICAgY2FyZC5zdHlsZS53aWR0aCA9IE1hdGgubWluKDI4MCwgbWF4VykgKyAncHgnOwoKICAgIHJldHVybiB0cnVlOwogIH0KCiAgbGV0IHRyaWVzPTA7CiAgZnVuY3Rpb24gYm9vdCgpewogICAgaWYocGxhY2UoKSkgcmV0dXJuOwogICAgY29uc3QgdGltZXI9c2V0SW50ZXJ2YWwoKCk9PnsKICAgICAgdHJpZXMrKzsKICAgICAgaWYocGxhY2UoKSB8fCB0cmllcz40MCkgY2xlYXJJbnRlcnZhbCh0aW1lcik7CiAgICB9LDI1MCk7CiAgfQoKICB3aW5kb3cuYWRkRXZlbnRMaXN0ZW5lcigncmVzaXplJywgcGxhY2UpOwogIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdzY3JvbGwnLCBwbGFjZSwge3Bhc3NpdmU6dHJ1ZX0pOwoKICBpZihkb2N1bWVudC5yZWFkeVN0YXRlPT09J2xvYWRpbmcnKXsKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLGJvb3QpOwogIH1lbHNlewogICAgYm9vdCgpOwogIH0KfSkoKTsKPC9zY3JpcHQ+Cg==').decode('utf-8'); i=s.lower().rfind('</body>'); p.write_text(s if marker in s else (s[:i]+patch+s[i:] if i>=0 else s+patch), encoding='utf-8')"
+          git show cbeee2bfb354fcddfc9ff7978e5f1a6632bb31ba:index.html > index.html
 
-      - name: Commit
+      - name: Commit restored homepage
         run: |
-          if git diff --quiet; then exit 0; fi
+          if git diff --quiet; then
+            echo "Homepage already restored"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Fix Writing Time position inside homepage artwork"
+          git commit -m "Restore homepage after Writing Time layout issue"
           git push
