@@ -570,4 +570,36 @@ document.querySelectorAll('[data-open="writing"]').forEach(btn=>btn.addEventList
 renderTraceLetter();renderTraceWord();renderCopy();renderListen();
 // WRITING_V2_END
 
-</script></body></html>
+</script>
+<!-- AYAAN_WRITING_TIME_INSIDE_HERO_V2 -->
+<style>
+.ayaan-writing-inside-picture{
+ position:absolute!important;z-index:30!important;left:50%!important;bottom:5%!important;
+ transform:translateX(-50%)!important;margin:0!important;white-space:nowrap!important;
+ filter:drop-shadow(0 4px 8px rgba(0,0,0,.28));
+}
+@media(max-width:700px){
+ .ayaan-writing-inside-picture{bottom:4%!important;transform:translateX(-50%) scale(.9)!important;}
+}
+</style>
+<script>
+(function(){
+ function norm(t){return (t||'').replace(/\s+/g,' ').trim().toLowerCase()}
+ function visible(e){if(!e)return false;var r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'}
+ function place(){
+  var els=[].slice.call(document.querySelectorAll('a,button,[role="button"],div,span'));
+  var w=els.filter(function(e){return visible(e)&&norm(e.textContent)==='writing time'}).sort(function(a,b){return a.children.length-b.children.length})[0];
+  var imgs=[].slice.call(document.images).filter(visible).sort(function(a,b){var x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return y.width*y.height-x.width*x.height});
+  var img=imgs[0];
+  if(!w||!img)return false;
+  var c=w.closest('a,button,[role="button"]')||w;
+  var h=img.parentElement;
+  if(!h||h===document.body){h=document.createElement('div');h.style.position='relative';h.style.display='inline-block';img.parentNode.insertBefore(h,img);h.appendChild(img)}
+  else if(getComputedStyle(h).position==='static')h.style.position='relative';
+  c.classList.add('ayaan-writing-inside-picture');h.appendChild(c);return true
+ }
+ function run(){if(place())return;var n=0,t=setInterval(function(){if(place()||++n>40)clearInterval(t)},250)}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run()
+})();
+</script>
+</body></html>
