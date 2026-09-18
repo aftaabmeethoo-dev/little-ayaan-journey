@@ -602,4 +602,125 @@ renderTraceLetter();renderTraceWord();renderCopy();renderListen();
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run()
 })();
 </script>
+
+<!-- AYAAN_WRITING_TIME_INSIDE_HERO_V3 -->
+<style>
+  .ayaan-writing-inside-picture-v3{
+    position:absolute!important;
+    z-index:9999!important;
+    margin:0!important;
+    width:auto!important;
+    max-width:280px!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+
+  @media (max-width:700px){
+    .ayaan-writing-inside-picture-v3{
+      max-width:190px!important;
+      transform:scale(.88)!important;
+      transform-origin:top left!important;
+    }
+  }
+</style>
+
+<script>
+(function(){
+  function txt(el){
+    return ((el && el.textContent) || '').replace(/\s+/g,' ').trim().toLowerCase();
+  }
+
+  function visible(el){
+    if(!el) return false;
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    return r.width > 0 && r.height > 0 &&
+           s.display !== 'none' &&
+           s.visibility !== 'hidden';
+  }
+
+  function findWritingCard(){
+    const all = [...document.querySelectorAll('body *')];
+    const matches = all.filter(el => {
+      const t = txt(el);
+      return visible(el) &&
+             t.includes('writing time') &&
+             t.length < 120;
+    });
+
+    if(!matches.length) return null;
+
+    matches.sort((a,b) => {
+      const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
+      return (br.width*br.height) - (ar.width*ar.height);
+    });
+
+    for(const m of matches){
+      const r=m.getBoundingClientRect();
+      if(r.width > 180 && r.height > 50) return m;
+    }
+
+    return matches[0];
+  }
+
+  function findHero(){
+    const imgs=[...document.images].filter(visible);
+    if(!imgs.length) return null;
+
+    imgs.sort((a,b)=>{
+      const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
+      return (br.width*br.height)-(ar.width*ar.height);
+    });
+
+    return imgs[0];
+  }
+
+  function place(){
+    const card=findWritingCard();
+    const img=findHero();
+    if(!card || !img) return false;
+
+    card.classList.remove('ayaan-writing-inside-picture');
+    card.classList.add('ayaan-writing-inside-picture-v3');
+
+    if(card.parentElement !== document.body){
+      document.body.appendChild(card);
+    }
+
+    const r=img.getBoundingClientRect();
+
+    /* Place inside the illustration, lower-right section */
+    const left = window.scrollX + r.left + (r.width * 0.61);
+    const top  = window.scrollY + r.top  + (r.height * 0.77);
+
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+    card.style.bottom = 'auto';
+    card.style.right = 'auto';
+
+    const maxW = r.width * 0.32;
+    card.style.width = Math.min(280, maxW) + 'px';
+
+    return true;
+  }
+
+  let tries=0;
+  function boot(){
+    if(place()) return;
+    const timer=setInterval(()=>{
+      tries++;
+      if(place() || tries>40) clearInterval(timer);
+    },250);
+  }
+
+  window.addEventListener('resize', place);
+  window.addEventListener('scroll', place, {passive:true});
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',boot);
+  }else{
+    boot();
+  }
+})();
+</script>
 </body></html>
